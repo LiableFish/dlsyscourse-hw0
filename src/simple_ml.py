@@ -102,6 +102,21 @@ def softmax_loss(Z, y):
     ### END YOUR CODE
 
 
+def _onehot(y: np.ndarray, number_of_classes: int) -> np.ndarray:
+    return np.identity(number_of_classes)[y]
+
+
+def _softmax(Z: np.ndarray) -> np.ndarray:
+    return np.exp(Z) / np.sum(np.exp(Z), axis=1, keepdims=True)
+
+
+def _softmax_regression_gradient(X: np.ndarray, y: np.ndarray, theta: np.ndarray) -> np.ndarray:
+    return np.dot(
+        X.T,
+        _softmax(np.dot(X, theta)) - _onehot(y, number_of_classes=theta.shape[1]),
+    ) / X.shape[0]
+
+
 def softmax_regression_epoch(X, y, theta, lr=0.1, batch=100):
     """ Run a single epoch of SGD for softmax regression on the data, using
     the step size lr and specified batch size.  This function should modify the
@@ -121,7 +136,12 @@ def softmax_regression_epoch(X, y, theta, lr=0.1, batch=100):
         None
     """
     ### BEGIN YOUR CODE
-    pass
+    for start in range(0, X.shape[0], batch):
+        theta -= lr * _softmax_regression_gradient(
+            X=X[start:start + batch],
+            y=y[start:start + batch],
+            theta=theta
+        )
     ### END YOUR CODE
 
 
