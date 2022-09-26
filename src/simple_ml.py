@@ -145,6 +145,30 @@ def softmax_regression_epoch(X, y, theta, lr=0.1, batch=100):
     ### END YOUR CODE
 
 
+def _relu(X: np.ndarray) -> np.ndarray:
+    return np.maximum(X, 0)
+
+
+def _Z1(X: np.ndarray, W1: np.ndarray) -> np.ndarray:
+    return _relu(np.dot(X, W1))
+
+
+def _G2(Z1: np.ndarray, W2: np.ndarray, y: np.ndarray) -> np.ndarray:
+    return _softmax(np.dot(Z1, W2)) - _onehot(y, number_of_classes=W2.shape[1])
+
+
+def _G1(Z1: np.ndarray, G2: np.ndarray, W2: np.ndarray) -> np.ndarray:
+    return np.where(Z1 > 0, np.dot(G2, W2.T), 0)
+
+
+def _w1_gradient(X: np.ndarray, G1: np.ndarray) -> np.ndarray:
+    return np.dot(X.T, G1) / X.shape[0]
+
+
+def _w2_gradient(Z1: np.ndarray, G2: np.ndarray) -> np.ndarray:
+    return np.dot(Z1.T, G2) / Z1.shape[0]
+
+
 def nn_epoch(X, y, W1, W2, lr=0.1, batch=100):
     """ Run a single epoch of SGD for a two-layer neural network defined by the
     weights W1 and W2 (with no bias terms):
@@ -168,7 +192,14 @@ def nn_epoch(X, y, W1, W2, lr=0.1, batch=100):
         None
     """
     ### BEGIN YOUR CODE
-    pass
+    for start in range(0, X.shape[0], batch):
+        X_batch = X[start:start + batch]
+        y_batch = y[start:start + batch]
+        Z1 = _Z1(X_batch, W1)
+        G2 = _G2(Z1, W2, y_batch)
+        G1 = _G1(Z1, G2, W2)
+        W1 -= lr * _w1_gradient(X_batch, G1)
+        W2 -= lr * _w2_gradient(Z1, G2)
     ### END YOUR CODE
 
 
